@@ -12,6 +12,7 @@ contract Lottery{
 
     receive() external payable{
         require(msg.value == 0.1 ether);
+        require(msg.sender != manager);
         players.push(payable(msg.sender));
     }
 
@@ -22,5 +23,16 @@ contract Lottery{
 
     function random() public view returns(uint){
         return uint(keccak256(abi.encodePacked(block.difficulty,block.timestamp,players.length)));
+    }
+
+    function pickWinner() public {
+        require(msg.sender == manager);
+        require(players.length >=3);
+        uint r = random();
+        address payable winner;
+        uint index = r % players.length;
+        winner = players[index];
+        winner.transfer(getBalance());
+        players = new address payable[](0);
     }
 }
